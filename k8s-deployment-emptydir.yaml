@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dual-container-deployment
+  labels:
+    app: file-creator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-creator
+  template:
+    metadata:
+      labels:
+        app: file-creator
+    spec:
+      containers:
+        - name: container-1
+          image: alpine
+          command: ["/bin/sh", "-c", "while true; do echo \"\" > /mount/log$(date +%s).txt; sleep 60; done"]
+          volumeMounts:
+            - name: shared-volume
+              mountPath: /mount
+        - name: container-2
+          image: alpine
+          command: ["/bin/sh", "-c", "while true; do echo \"\" > /mount/file$(date +%s).txt; sleep 60; done"]
+          volumeMounts:
+            - name: shared-volume
+              mountPath: /mount
+      volumes:
+        - name: shared-volume
+          emptyDir: {}
